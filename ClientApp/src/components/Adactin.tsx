@@ -1,30 +1,26 @@
 ﻿import * as React from 'react';
-import { connect } from 'react-redux';
-import {
-    Badge, Button, ButtonDropdown, ButtonGroup, ButtonToolbar, Card, CardBody, CardFooter, CardHeader, Modal, ModalBody,
-    ModalFooter, ModalHeader, CardTitle, Col, Dropdown, DropdownItem, DropdownMenu, DropdownToggle, Progress, Row, Table,
-    Label, FormGroup, Input, Spinner, Collapse
-} from 'reactstrap';
+import {Button, Card, CardBody, CardFooter, CardHeader, Col, Row,Label, Input} from 'reactstrap';
 import { Occupation, Rating } from '../models/Classes'
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; 
 import * as Helpers from '../helpers/DateTimeHelpers';
 
-interface PremiumCalculatorProps{
-
-}
-
 interface PremiumCalculatorState {
     selectedOccupation: string,
     selectedRatingID: number,
-    selectedFactor : number,
+    selectedFactor: number,
     selectedSumInsured: number,
     selectedName: string,
     occupations: Array<Occupation>,
     ratings: Array<Rating>,
-    calculatedAge: number,    
+    calculatedAge: number,
     calculatedMonthlyPremium: number,
 }
+
+interface PremiumCalculatorProps{
+
+}
+
 
 const ratinglist = [
     { ratingid: 1, rating: "Professional", factor: 1.0 },
@@ -145,7 +141,7 @@ class PremiumCalculator extends React.Component<PremiumCalculatorProps, PremiumC
                                 <Label htmlFor="select">Name</Label>
                             </Col>
                             <Col xs="12" sm="12" md="4" lg="4">
-                                <Input type="text" placeholder='Name' required
+                                <Input id="name" type="text" placeholder='Name' required
                                     onChange={(event: any) => {
                                         this.setState({
                                             selectedName: event.target.value        
@@ -165,7 +161,7 @@ class PremiumCalculator extends React.Component<PremiumCalculatorProps, PremiumC
                                 <Label htmlFor="select">Age</Label>
                             </Col>
                             <Col xs="12" sm="12" md="4" lg="4">
-                            <Input type="text" disabled value={this.state.calculatedAge}/>
+                                <Input id="age" type="text" disabled value={this.state.calculatedAge}/>
                             </Col>
                         </Row>
                         <Row>
@@ -174,6 +170,7 @@ class PremiumCalculator extends React.Component<PremiumCalculatorProps, PremiumC
                             </Col>
                             <Col xs="12" sm="12" md="4" lg="4">
                                 <Input 
+                                    id="dob"
                                     type="date" 
                                     onChange={this.handleDateofBirthChange.bind(this)}  
                                     min={this.calculateMinDate()}                                  
@@ -186,7 +183,10 @@ class PremiumCalculator extends React.Component<PremiumCalculatorProps, PremiumC
                                 <Label htmlFor="select">Occupation</Label>
                             </Col>
                             <Col xs="12" sm="12" md="4" lg="4">
-                                <Input type="select" placeholder='Select'
+                                <Input
+                                    id="occupation"
+                                    type="select"
+                                    placeholder='Select'
                                     onChange={this.handleOccupationChange.bind(this)}
                                 >
                                     {this.state.occupations.map(item =>
@@ -200,7 +200,10 @@ class PremiumCalculator extends React.Component<PremiumCalculatorProps, PremiumC
                                 <Label htmlFor="select">Sum Insured</Label>
                             </Col>
                             <Col xs="12" sm="12" md="4" lg="4">
-                                <Input type="number" onChange={this.handleSumInsuredChange.bind(this)}/>
+                                <Input
+                                    id="suminsured"
+                                    type="number"
+                                    onChange={this.handleSumInsuredChange.bind(this)} />
                             </Col>
                         </Row>    
                     </CardBody>
