@@ -7,10 +7,9 @@ import {
   Modal,
   StyleSheet,
   Platform,
-  ScrollView,
   KeyboardAvoidingView,
 } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import DatePickerModal from './DatePickerModal';
 
 const PRIORITIES = ['low', 'medium', 'high'];
 const PRIORITY_COLORS = { low: '#4CAF50', medium: '#FF9800', high: '#F44336' };
@@ -30,9 +29,9 @@ export default function AddTodoModal({ visible, onClose, onAdd }) {
     onClose();
   };
 
-  const handleDateChange = (event, selected) => {
-    setShowDatePicker(Platform.OS === 'ios');
-    if (selected) setDueDate(selected);
+  const handleDateConfirm = (date) => {
+    setDueDate(date);
+    setShowDatePicker(false);
   };
 
   return (
@@ -87,15 +86,12 @@ export default function AddTodoModal({ visible, onClose, onAdd }) {
             )}
           </TouchableOpacity>
 
-          {showDatePicker && (
-            <DateTimePicker
-              value={dueDate || new Date()}
-              mode="date"
-              display={Platform.OS === 'ios' ? 'inline' : 'default'}
-              minimumDate={new Date()}
-              onChange={handleDateChange}
-            />
-          )}
+          <DatePickerModal
+            visible={showDatePicker}
+            initialDate={dueDate}
+            onConfirm={handleDateConfirm}
+            onCancel={() => setShowDatePicker(false)}
+          />
 
           <View style={styles.actions}>
             <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
