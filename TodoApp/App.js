@@ -8,15 +8,12 @@ import {
   SafeAreaView,
   StatusBar,
   Alert,
-  ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import TodoItem from './src/components/TodoItem';
 import AddTodoModal from './src/components/AddTodoModal';
 import FilterBar from './src/components/FilterBar';
-import MoveStoreModal from './src/components/MoveStoreModal';
-
 const STORAGE_KEY = '@todos_v1';
 const STORES_KEY = '@stores_v1';
 const DEFAULT_STORES = ['Aldi', 'Coles', 'Woolworths', 'IGA'];
@@ -25,7 +22,7 @@ export default function App() {
   const [todos, setTodos] = useState([]);
   const [stores, setStores] = useState(DEFAULT_STORES);
   const [modalVisible, setModalVisible] = useState(false);
-  const [movingTodoId, setMovingTodoId] = useState(null);
+  const [editingTodo, setEditingTodo] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
 
@@ -77,19 +74,9 @@ export default function App() {
     [todos, persistTodos]
   );
 
-  const moveTodo = useCallback(
-    (id, newStore) => {
-      persistTodos(todos.map((t) => (t.id === id ? { ...t, store: newStore } : t)));
-      setMovingTodoId(null);
-    },
+  const updateTodo = useCallback(
+    (updated) => persistTodos(todos.map((t) => (t.id === updated.id ? updated : t))),
     [todos, persistTodos]
-  );
-
-  const addStore = useCallback(
-    (name) => {
-      if (!stores.includes(name)) persistStores([...stores, name]);
-    },
-    [stores, persistStores]
   );
 
   const filteredTodos = todos.filter((t) => {
@@ -119,7 +106,6 @@ export default function App() {
   }
 
   const counts = { total: todos.length, done: todos.filter((t) => t.completed).length };
-  const movingTodo = movingTodoId ? todos.find((t) => t.id === movingTodoId) : null;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -167,7 +153,7 @@ export default function App() {
                   todo={item}
                   onToggle={toggleTodo}
                   onDelete={deleteTodo}
-                  onMove={(id) => setMovingTodoId(id)}
+                  onEdit={(todo) => setEditingTodo(todo)}
                 />
               )
             }
@@ -178,22 +164,13 @@ export default function App() {
       </View>
 
       <AddTodoModal
-        visible={modalVisible}
-        onClose={() => setModalVisible(false)}
+        visible={modalVisible || !!editingTodo}
+        onClose={() => { setModalVisible(false); setEditingTodo(null); }}
         onAdd={addTodo}
+        onEdit={updateTodo}
         stores={stores}
+        editItem={editingTodo}
       />
-
-      {movingTodo && (
-        <MoveStoreModal
-          visible={!!movingTodoId}
-          currentStore={movingTodo.store ?? 'Other'}
-          stores={stores}
-          onConfirm={(newStore) => moveTodo(movingTodoId, newStore)}
-          onCancel={() => setMovingTodoId(null)}
-          onAddStore={addStore}
-        />
-      )}
     </SafeAreaView>
   );
 }
