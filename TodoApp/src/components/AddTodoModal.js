@@ -15,38 +15,20 @@ import DatePickerModal from './DatePickerModal';
 const PRIORITIES = ['low', 'medium', 'high'];
 const PRIORITY_COLORS = { low: '#4CAF50', medium: '#FF9800', high: '#F44336' };
 
-export default function AddTodoModal({ visible, onClose, onAdd, onEdit, stores, editItem }) {
-  const isEdit = !!editItem;
-
+export default function AddTodoModal({ visible, onClose, onAdd, stores }) {
   const [title, setTitle] = useState('');
   const [priority, setPriority] = useState('medium');
   const [dueDate, setDueDate] = useState(null);
   const [store, setStore] = useState(stores?.[0] ?? 'Other');
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // Sync fields when editItem changes (modal opens for a different item)
-  React.useEffect(() => {
-    if (editItem) {
-      setTitle(editItem.title);
-      setPriority(editItem.priority ?? 'medium');
-      setDueDate(editItem.dueDate ? new Date(editItem.dueDate) : null);
-      setStore(editItem.store ?? stores?.[0] ?? 'Other');
-    } else {
-      setTitle('');
-      setPriority('medium');
-      setDueDate(null);
-      setStore(stores?.[0] ?? 'Other');
-    }
-  }, [editItem, visible]);
-
-  const handleSave = () => {
+  const handleAdd = () => {
     if (!title.trim()) return;
-    const data = { title: title.trim(), priority, dueDate: dueDate ? dueDate.toISOString() : null, store };
-    if (isEdit) {
-      onEdit({ ...editItem, ...data });
-    } else {
-      onAdd(data);
-    }
+    onAdd({ title: title.trim(), priority, dueDate: dueDate ? dueDate.toISOString() : null, store });
+    setTitle('');
+    setPriority('medium');
+    setDueDate(null);
+    setStore(stores?.[0] ?? 'Other');
     onClose();
   };
 
@@ -60,12 +42,12 @@ export default function AddTodoModal({ visible, onClose, onAdd, onEdit, stores, 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.overlay}>
         <View style={styles.sheet}>
           <View style={styles.handle} />
-          <Text style={styles.heading}>{isEdit ? 'Edit Item' : 'New Item'}</Text>
+          <Text style={styles.heading}>New Todo</Text>
 
-          <Text style={styles.label}>Item name</Text>
+          <Text style={styles.label}>What needs to be done?</Text>
           <TextInput
             style={styles.input}
-            placeholder="e.g. Wholemeal bread"
+            placeholder="e.g. Buy groceries"
             placeholderTextColor="#BBBBBB"
             value={title}
             onChangeText={setTitle}
@@ -135,10 +117,10 @@ export default function AddTodoModal({ visible, onClose, onAdd, onEdit, stores, 
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.addBtn, !title.trim() && styles.addBtnDisabled]}
-              onPress={handleSave}
+              onPress={handleAdd}
               disabled={!title.trim()}
             >
-              <Text style={styles.addBtnText}>{isEdit ? 'Save' : 'Add Item'}</Text>
+              <Text style={styles.addBtnText}>Add Todo</Text>
             </TouchableOpacity>
           </View>
         </View>
