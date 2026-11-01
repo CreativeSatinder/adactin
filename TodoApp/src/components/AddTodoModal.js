@@ -8,24 +8,27 @@ import {
   StyleSheet,
   Platform,
   KeyboardAvoidingView,
+  ScrollView,
 } from 'react-native';
 import DatePickerModal from './DatePickerModal';
 
 const PRIORITIES = ['low', 'medium', 'high'];
 const PRIORITY_COLORS = { low: '#4CAF50', medium: '#FF9800', high: '#F44336' };
 
-export default function AddTodoModal({ visible, onClose, onAdd }) {
+export default function AddTodoModal({ visible, onClose, onAdd, stores }) {
   const [title, setTitle] = useState('');
   const [priority, setPriority] = useState('medium');
   const [dueDate, setDueDate] = useState(null);
+  const [store, setStore] = useState(stores?.[0] ?? 'Other');
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const handleAdd = () => {
     if (!title.trim()) return;
-    onAdd({ title: title.trim(), priority, dueDate: dueDate ? dueDate.toISOString() : null });
+    onAdd({ title: title.trim(), priority, dueDate: dueDate ? dueDate.toISOString() : null, store });
     setTitle('');
     setPriority('medium');
     setDueDate(null);
+    setStore(stores?.[0] ?? 'Other');
     onClose();
   };
 
@@ -70,6 +73,21 @@ export default function AddTodoModal({ visible, onClose, onAdd }) {
               </TouchableOpacity>
             ))}
           </View>
+
+          <Text style={styles.label}>Store</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.storeScroll}>
+            {(stores ?? []).map((s) => (
+              <TouchableOpacity
+                key={s}
+                style={[styles.storePill, store === s && styles.storePillActive]}
+                onPress={() => setStore(s)}
+              >
+                <Text style={[styles.storePillText, store === s && styles.storePillTextActive]}>
+                  🏪 {s}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
 
           <Text style={styles.label}>Due Date (optional)</Text>
           <TouchableOpacity style={styles.dateBtn} onPress={() => setShowDatePicker(true)}>
@@ -165,6 +183,19 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     backgroundColor: '#FAFAFA',
   },
+  storeScroll: { marginBottom: 20 },
+  storePill: {
+    borderWidth: 1.5,
+    borderColor: '#E0E0E0',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    marginRight: 8,
+    backgroundColor: '#fff',
+  },
+  storePillActive: { backgroundColor: '#6C63FF', borderColor: '#6C63FF' },
+  storePillText: { fontSize: 14, color: '#555', fontWeight: '500' },
+  storePillTextActive: { color: '#fff', fontWeight: '700' },
   dateBtnText: { fontSize: 16, color: '#1A1A2E' },
   clearDate: { color: '#CCCCCC', fontSize: 16, fontWeight: 'bold' },
   actions: { flexDirection: 'row', gap: 12 },

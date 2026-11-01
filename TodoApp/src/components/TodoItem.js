@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 const PRIORITY_COLORS = { low: '#4CAF50', medium: '#FF9800', high: '#F44336' };
 const PRIORITY_BG = { low: '#E8F5E9', medium: '#FFF3E0', high: '#FFEBEE' };
 
-export default function TodoItem({ todo, onToggle, onDelete }) {
+export default function TodoItem({ todo, onToggle, onDelete, onMove }) {
   const isOverdue =
     todo.dueDate && !todo.completed && new Date(todo.dueDate) < new Date(new Date().toDateString());
 
@@ -36,9 +36,14 @@ export default function TodoItem({ todo, onToggle, onDelete }) {
         </View>
       </View>
 
-      <TouchableOpacity onPress={() => onDelete(todo.id)} style={styles.deleteBtn}>
-        <Text style={styles.deleteText}>✕</Text>
-      </TouchableOpacity>
+      <View style={styles.actions}>
+        <TouchableOpacity onPress={() => onMove(todo.id)} style={styles.moveBtn}>
+          <Text style={styles.moveBtnText}>↔</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => onDelete(todo.id)} style={styles.deleteBtn}>
+          <Text style={styles.deleteText}>✕</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -77,6 +82,9 @@ const styles = StyleSheet.create({
   priorityText: { fontSize: 10, fontWeight: '700', letterSpacing: 0.5 },
   dueDate: { fontSize: 12, color: '#888' },
   overdue: { color: '#F44336', fontWeight: '600' },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  moveBtn: { padding: 6 },
+  moveBtnText: { color: '#6C63FF', fontSize: 18, fontWeight: 'bold' },
   deleteBtn: { padding: 6 },
   deleteText: { color: '#CCCCCC', fontSize: 18, fontWeight: 'bold' },
 });
