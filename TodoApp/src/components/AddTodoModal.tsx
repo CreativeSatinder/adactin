@@ -11,14 +11,22 @@ import {
   ScrollView,
 } from 'react-native';
 import DatePickerModal from './DatePickerModal';
+import { Priority, TodoItem } from '../types';
 
-const PRIORITIES = ['low', 'medium', 'high'];
-const PRIORITY_COLORS = { low: '#4CAF50', medium: '#FF9800', high: '#F44336' };
+const PRIORITIES: Priority[] = ['low', 'medium', 'high'];
+const PRIORITY_COLORS: Record<Priority, string> = { low: '#4CAF50', medium: '#FF9800', high: '#F44336' };
 
-export default function AddTodoModal({ visible, onClose, onAdd, stores }) {
+interface Props {
+  visible: boolean;
+  onClose: () => void;
+  onAdd: (item: Pick<TodoItem, 'title' | 'priority' | 'dueDate' | 'store'>) => void;
+  stores: string[];
+}
+
+export default function AddTodoModal({ visible, onClose, onAdd, stores }: Props) {
   const [title, setTitle] = useState('');
-  const [priority, setPriority] = useState('medium');
-  const [dueDate, setDueDate] = useState(null);
+  const [priority, setPriority] = useState<Priority>('medium');
+  const [dueDate, setDueDate] = useState<Date | null>(null);
   const [store, setStore] = useState(stores?.[0] ?? 'Other');
   const [showDatePicker, setShowDatePicker] = useState(false);
 
@@ -32,7 +40,7 @@ export default function AddTodoModal({ visible, onClose, onAdd, stores }) {
     onClose();
   };
 
-  const handleDateConfirm = (date) => {
+  const handleDateConfirm = (date: Date) => {
     setDueDate(date);
     setShowDatePicker(false);
   };
@@ -92,7 +100,9 @@ export default function AddTodoModal({ visible, onClose, onAdd, stores }) {
           <Text style={styles.label}>Due Date (optional)</Text>
           <TouchableOpacity style={styles.dateBtn} onPress={() => setShowDatePicker(true)}>
             <Text style={styles.dateBtnText}>
-              {dueDate ? dueDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : 'Pick a date'}
+              {dueDate
+                ? dueDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
+                : 'Pick a date'}
             </Text>
             {dueDate && (
               <TouchableOpacity
@@ -130,11 +140,7 @@ export default function AddTodoModal({ visible, onClose, onAdd, stores }) {
 }
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.4)',
-  },
+  overlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.4)' },
   sheet: {
     backgroundColor: '#fff',
     borderTopLeftRadius: 24,

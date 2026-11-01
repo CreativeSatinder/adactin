@@ -9,7 +9,16 @@ import {
   ScrollView,
 } from 'react-native';
 
-export default function MoveStoreModal({ visible, currentStore, stores, onConfirm, onCancel, onAddStore }) {
+interface Props {
+  visible: boolean;
+  currentStore: string;
+  stores: string[];
+  onConfirm: (store: string) => void;
+  onCancel: () => void;
+  onAddStore: (name: string) => void;
+}
+
+export default function MoveStoreModal({ visible, currentStore, stores, onConfirm, onCancel, onAddStore }: Props) {
   const [newStore, setNewStore] = useState('');
   const [showInput, setShowInput] = useState(false);
 
@@ -36,7 +45,7 @@ export default function MoveStoreModal({ visible, currentStore, stores, onConfir
                 style={[styles.storeRow, store === currentStore && styles.storeRowActive]}
                 onPress={() => onConfirm(store)}
               >
-                <Text style={[styles.storeIcon]}>🏪</Text>
+                <Text style={styles.storeIcon}>🏪</Text>
                 <Text style={[styles.storeName, store === currentStore && styles.storeNameActive]}>
                   {store}
                 </Text>
@@ -124,11 +133,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   addStoreBtnText: { color: '#6C63FF', fontWeight: '600', fontSize: 15 },
-  newStoreRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 6,
-  },
+  newStoreRow: { flexDirection: 'row', gap: 8, marginBottom: 6 },
   newStoreInput: {
     flex: 1,
     borderWidth: 1.5,

@@ -8,7 +8,6 @@ import {
   SafeAreaView,
   StatusBar,
   Alert,
-  ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
@@ -16,39 +15,47 @@ import TodoItem from './src/components/TodoItem';
 import AddTodoModal from './src/components/AddTodoModal';
 import FilterBar from './src/components/FilterBar';
 import MoveStoreModal from './src/components/MoveStoreModal';
+import { TodoItem as TodoItemType, StatusFilter, PriorityFilter } from './src/types';
 
 const STORAGE_KEY = '@todos_v1';
 const STORES_KEY = '@stores_v1';
 const DEFAULT_STORES = ['Aldi', 'Coles', 'Woolworths', 'IGA'];
 
+type HeaderRow = { type: 'header'; id: string; store: string; count: number };
+type ItemRow = { type: 'item' } & TodoItemType;
+type ListRow = HeaderRow | ItemRow;
+
 export default function App() {
-  const [todos, setTodos] = useState([]);
-  const [stores, setStores] = useState(DEFAULT_STORES);
+  const [todos, setTodos] = useState<TodoItemType[]>([]);
+  const [stores, setStores] = useState<string[]>(DEFAULT_STORES);
   const [modalVisible, setModalVisible] = useState(false);
-  const [movingTodoId, setMovingTodoId] = useState(null);
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [priorityFilter, setPriorityFilter] = useState('all');
+  const [movingTodoId, setMovingTodoId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>('all');
 
   useEffect(() => {
-    AsyncStorage.multiGet([STORAGE_KEY, STORES_KEY]).then(([[, todosData], [, storesData]]) => {
+    Promise.all([
+      AsyncStorage.getItem(STORAGE_KEY),
+      AsyncStorage.getItem(STORES_KEY),
+    ]).then(([todosData, storesData]) => {
       if (todosData) setTodos(JSON.parse(todosData));
       if (storesData) setStores(JSON.parse(storesData));
     });
   }, []);
 
-  const persistTodos = useCallback((updated) => {
+  const persistTodos = useCallback((updated: TodoItemType[]) => {
     setTodos(updated);
     AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   }, []);
 
-  const persistStores = useCallback((updated) => {
+  const persistStores = useCallback((updated: string[]) => {
     setStores(updated);
     AsyncStorage.setItem(STORES_KEY, JSON.stringify(updated));
   }, []);
 
   const addTodo = useCallback(
-    ({ title, priority, dueDate, store }) => {
-      const todo = {
+    ({ title, priority, dueDate, store }: Pick<TodoItemType, 'title' | 'priority' | 'dueDate' | 'store'>) => {
+      const todo: TodoItemType = {
         id: Date.now().toString(),
         title,
         priority,
@@ -63,12 +70,12 @@ export default function App() {
   );
 
   const toggleTodo = useCallback(
-    (id) => persistTodos(todos.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))),
+    (id: string) => persistTodos(todos.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t))),
     [todos, persistTodos]
   );
 
   const deleteTodo = useCallback(
-    (id) => {
+    (id: string) => {
       Alert.alert('Delete Item', 'Remove this item?', [
         { text: 'Cancel', style: 'cancel' },
         { text: 'Delete', style: 'destructive', onPress: () => persistTodos(todos.filter((t) => t.id !== id)) },
@@ -78,7 +85,7 @@ export default function App() {
   );
 
   const moveTodo = useCallback(
-    (id, newStore) => {
+    (id: string, newStore: string) => {
       persistTodos(todos.map((t) => (t.id === id ? { ...t, store: newStore } : t)));
       setMovingTodoId(null);
     },
@@ -86,7 +93,7 @@ export default function App() {
   );
 
   const addStore = useCallback(
-    (name) => {
+    (name: string) => {
       if (!stores.includes(name)) persistStores([...stores, name]);
     },
     [stores, persistStores]
@@ -101,8 +108,7 @@ export default function App() {
     return statusOk && priorityOk;
   });
 
-  // Build grouped list: [{type:'header', store}, {type:'item', ...todo}, ...]
-  const grouped = stores.reduce((acc, store) => {
+  const grouped = stores.reduce<ListRow[]>((acc, store) => {
     const items = filteredTodos.filter((t) => (t.store ?? 'Other') === store);
     if (items.length > 0) {
       acc.push({ type: 'header', id: `header-${store}`, store, count: items.length });
@@ -111,7 +117,6 @@ export default function App() {
     return acc;
   }, []);
 
-  // Items with no matching store (e.g. old data)
   const unassigned = filteredTodos.filter((t) => !stores.includes(t.store ?? ''));
   if (unassigned.length > 0) {
     grouped.push({ type: 'header', id: 'header-other', store: 'Other', count: unassigned.length });
@@ -153,7 +158,7 @@ export default function App() {
             </Text>
           </View>
         ) : (
-          <FlatList
+          <FlatList<ListRow>
             data={grouped}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) =>
@@ -189,7 +194,7 @@ export default function App() {
           visible={!!movingTodoId}
           currentStore={movingTodo.store ?? 'Other'}
           stores={stores}
-          onConfirm={(newStore) => moveTodo(movingTodoId, newStore)}
+          onConfirm={(newStore) => moveTodo(movingTodoId!, newStore)}
           onCancel={() => setMovingTodoId(null)}
           onAddStore={addStore}
         />

@@ -1,20 +1,28 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { StatusFilter, PriorityFilter } from '../types';
 
-const STATUS_FILTERS = [
+const STATUS_FILTERS: { key: StatusFilter; label: string }[] = [
   { key: 'all', label: 'All' },
   { key: 'active', label: 'Active' },
   { key: 'completed', label: 'Done' },
 ];
 
-const PRIORITY_FILTERS = [
+const PRIORITY_FILTERS: { key: PriorityFilter; label: string }[] = [
   { key: 'all', label: 'Any priority' },
   { key: 'high', label: '🔴 High' },
   { key: 'medium', label: '🟠 Medium' },
   { key: 'low', label: '🟢 Low' },
 ];
 
-export default function FilterBar({ statusFilter, priorityFilter, onStatusChange, onPriorityChange }) {
+interface Props {
+  statusFilter: StatusFilter;
+  priorityFilter: PriorityFilter;
+  onStatusChange: (filter: StatusFilter) => void;
+  onPriorityChange: (filter: PriorityFilter) => void;
+}
+
+export default function FilterBar({ statusFilter, priorityFilter, onStatusChange, onPriorityChange }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.tabs}>

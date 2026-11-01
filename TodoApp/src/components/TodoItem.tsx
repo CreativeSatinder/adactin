@@ -1,10 +1,18 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { TodoItem as TodoItemType, Priority } from '../types';
 
-const PRIORITY_COLORS = { low: '#4CAF50', medium: '#FF9800', high: '#F44336' };
-const PRIORITY_BG = { low: '#E8F5E9', medium: '#FFF3E0', high: '#FFEBEE' };
+const PRIORITY_COLORS: Record<Priority, string> = { low: '#4CAF50', medium: '#FF9800', high: '#F44336' };
+const PRIORITY_BG: Record<Priority, string> = { low: '#E8F5E9', medium: '#FFF3E0', high: '#FFEBEE' };
 
-export default function TodoItem({ todo, onToggle, onDelete, onMove }) {
+interface Props {
+  todo: TodoItemType;
+  onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
+  onMove: (id: string) => void;
+}
+
+export default function TodoItem({ todo, onToggle, onDelete, onMove }: Props) {
   const isOverdue =
     todo.dueDate && !todo.completed && new Date(todo.dueDate) < new Date(new Date().toDateString());
 
